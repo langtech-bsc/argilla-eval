@@ -14,13 +14,30 @@ Deploy the Argilla server locally
 docker compose up -d
 ```
 
+Once Argilla server is deployed we need to create a virtual environment to interact with the server via the sdk.
+
 Create a venv and install requirements
 ```bash
 python -m venv venv
 pip install -r requirements.txt
 ```
 
-Run the script main.py to interact with the Argilla server
+Run `main.py` to create a workspace on the argilla server.
 ```bash
 python main.py
+```
+
+Run `users.py` to handle users on workspaces.
+```bash
+python users.py
+```
+
+Run `datasets.py` to manipulate datasets.
+```bash
+python datasets.py
+```
+
+Run `records` to query and extract records.
+```bash
+python records.py
 ```
