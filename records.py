@@ -8,6 +8,8 @@ load_dotenv()
 RG_API_URL = os.getenv('API_URL')
 RG_API_KEY = os.getenv('API_KEY')
 EVAL_WORKSPACE = os.getenv('RG_WORKSPACE')
+DATASET_PATH = os.getenv('DATASET_PATH')
+DATASET_NAME = os.getenv('DATASET_NAME')
 
 client = rg.Argilla(
     api_url=RG_API_URL, 
@@ -18,10 +20,10 @@ def load_json(file_path, encoding=None):
     with open(file_path, 'r', encoding=encoding) as file:
         return json.load(file)
     
-data_file = load_json('dataset.json')
+data_file = load_json(DATASET_PATH)
 
 """"QUERY RECORDS"""
-dataset = client.datasets(name="prompts-eval-dataset", workspace=client.workspaces(EVAL_WORKSPACE))
+dataset = client.datasets(name=DATASET_NAME, workspace=client.workspaces(EVAL_WORKSPACE))
 exported_records = dataset.records.to_json("./records.json")
 
 record_file = load_json('records.json', encoding='utf-8')

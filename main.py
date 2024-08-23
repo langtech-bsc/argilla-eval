@@ -8,6 +8,8 @@ RG_API_URL = os.getenv('API_URL')
 RG_API_KEY = os.getenv('API_KEY')
 EVAL_WORKSPACE = os.getenv('RG_WORKSPACE')
 NUMBER_USERS = int(os.getenv('NUMBER_USERS'))
+DATASET_PATH = os.getenv('DATASET_PATH')
+DATASET_NAME = os.getenv('DATASET_NAME')
 
 client = rg.Argilla(
     api_url=RG_API_URL, 
@@ -76,11 +78,11 @@ settings = rg.Settings(
     ],
 )
 
-data_file = load_json('dataset.json')
+data_file = load_json(DATASET_PATH)
 
 """DATASET CREATION"""
 dataset = rg.Dataset(
-    name="prompts-eval-dataset",
+    name=DATASET_NAME,
     workspace=EVAL_WORKSPACE,
     settings=settings,
     client=client

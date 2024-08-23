@@ -41,7 +41,6 @@ list_users = create_users(NUM_USERS)
 df_users = pd.DataFrame(list_users)
 df_users.to_csv('users.csv', index=False)
 
-
 for user in list_users:
     rg.User(
         username=user['username'],
@@ -50,8 +49,8 @@ for user in list_users:
         client=client
     ).create().add_to_workspace(client.workspaces(EVAL_WORKSPACE))
 
+# users_to_delete = ['72vLTjd7', 'SRlOXvMS', 'mEbBPsSS', 'oYI2gaUD', '1kctgsB2', 'VlnjFXHX']
+# for _ in users_to_delete:
+#     client.users(_).delete()
 
-# client.users('VgAGq0qY').delete()
-# client.users('5UGap1mL').delete()
-# client.users('L5q1gMX9').delete()
 for user in users: print(user)
