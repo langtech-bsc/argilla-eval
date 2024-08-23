@@ -24,22 +24,24 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-Run `main.py` to create a workspace on the argilla server.
+Run `workspace.py` to create a workspace on the argilla server.
 ```bash
-python main.py
+python workspace.py
 ```
 
 Run `users.py` to handle users on workspaces.
+Generated dynamically from `NUMBER_USERS` and stored at `users.csv`
 ```bash
 python users.py
 ```
 
-Run `datasets.py` to manipulate datasets.
+Run `datasets.py` to create and manipulate datasets.
 ```bash
 python datasets.py
 ```
 
 Run `records` to query and extract records.
+Stored as `records.json`
 ```bash
 python records.py
 ```
