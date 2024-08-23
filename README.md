@@ -2,6 +2,8 @@ Create an .env file with the following variables
 ```bash
 API_URL=http://localhost:6900
 API_KEY=argilla.apikey
+RG_WORKSPACE=eval_workspace
+NUMBER_USERS=number_of_users
 ```
 
 Once cloned download docker-compose.yaml
