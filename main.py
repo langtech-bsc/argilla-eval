@@ -73,11 +73,13 @@ settings = rg.Settings(
             name="text",
             title="Copy and modify the response here if there is anything you would like to modify.",
             description="If there is anything you would modify in the response copy and edit the response in this field.",
-            use_markdown=True
+            use_markdown=True,
+            required=False
         )
     ],
 )
 
+print(DATASET_PATH, type(DATASET_PATH))
 data_file = load_json(DATASET_PATH)
 
 """DATASET CREATION"""
