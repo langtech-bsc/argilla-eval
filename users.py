@@ -20,13 +20,13 @@ list_users = [
     {"username": "username_c", "password":"password_c", "role":"annotator"},
 ]
 
-for user in list_users:
-    rg.User(
-        username=user['username'],
-        password=user['password'],
-        role=user['role'],
-        client=client
-    ).create().add_to_workspace(client.workspaces(EVAL_WORKSPACE))
+# for user in list_users:
+#     rg.User(
+#         username=user['username'],
+#         password=user['password'],
+#         role=user['role'],
+#         client=client
+#     ).create().add_to_workspace(client.workspaces(EVAL_WORKSPACE))
 
 
 # client.users('username_a').delete()
