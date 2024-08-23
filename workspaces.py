@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-RG_API_URL = os.getenv('API_URL')
-RG_API_KEY = os.getenv('API_KEY')
-EVAL_WORKSPACE = os.getenv('RG_WORKSPACE')
+RG_API_URL = os.getenv('API_URL', "http://localhost:6900")
+RG_API_KEY = os.getenv('API_KEY', "argilla.apikey")
+EVAL_WORKSPACE = os.getenv('RG_WORKSPACE', "demo")
 
 client = rg.Argilla(
     api_url=RG_API_URL, 
