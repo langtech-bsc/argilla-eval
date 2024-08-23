@@ -16,7 +16,7 @@ client = rg.Argilla(
     api_key=ARGILLA_KEY
 )
 
-users = client.users
+
 
 def generate_random_string(length=8):
     characters = string.ascii_letters + string.digits
@@ -49,8 +49,14 @@ for user in list_users:
         client=client
     ).create().add_to_workspace(client.workspaces(EVAL_WORKSPACE))
 
-# users_to_delete = ['72vLTjd7', 'SRlOXvMS', 'mEbBPsSS', 'oYI2gaUD', '1kctgsB2', 'VlnjFXHX']
-# for _ in users_to_delete:
-#     client.users(_).delete()
 
-for user in users: print(user)
+
+"""DELETE USERS FROM SELECTED SPACE"""
+# workspace = client.workspaces(EVAL_WORKSPACE)
+# users_to_delete = [user.username for user in workspace.users]
+
+# for username in users_to_delete:
+#     client.users(username).delete()
+
+
+for user in client.users: print(user)
