@@ -8,6 +8,7 @@ load_dotenv()
 RG_API_URL = os.getenv('API_URL')
 RG_API_KEY = os.getenv('API_KEY')
 EVAL_WORKSPACE = os.getenv('RG_WORKSPACE')
+NUMBER_USERS = int(os.getenv('NUMBER_USERS'))
 
 client = rg.Argilla(
     api_url=RG_API_URL, 
@@ -20,7 +21,7 @@ def load_json(file_path, encoding=None):
 
 """DATASET SETTINGS"""
 settings = rg.Settings(
-    distribution=rg.TaskDistribution(min_submitted=3),
+    distribution=rg.TaskDistribution(min_submitted=NUMBER_USERS),
     allow_extra_metadata=True,
     guidelines="""
     1. **Consistency:** Label each example consistently according to the defined criteria, ensuring no bias towards either variant.
