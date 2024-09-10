@@ -11,6 +11,37 @@ NUMBER_USERS = int(os.getenv('NUMBER_USERS'))
 DATASET_PATH = os.getenv('DATASET_PATH')
 DATASET_NAME = os.getenv('DATASET_NAME')
 
+TABLE_EX_STRING = """
+<table>
+<tr>
+<th> Good </th>
+<th> Bad </th>
+</tr>
+<tr>
+<td>
+
+```c++
+int foo() {
+    int result = 4;
+    return result;
+}
+```
+
+</td>
+<td>
+
+```c++
+int foo() {
+    int x = 4;
+    return x;
+}
+```
+
+</td>
+</tr>
+</table>
+"""
+
 client = rg.Argilla(
     api_url=RG_API_URL, 
     api_key=RG_API_KEY
@@ -31,6 +62,14 @@ settings = rg.Settings(
     4. **Neutrality:** Avoid letting personal preferences influence your annotation; stick to the test's objective.
     """,
     fields=[
+            rg.TextField(
+                name="visual",
+                title="Visual",
+                use_markdown=True,
+                required=True,
+                description="Field description"
+            ),
+
             rg.TextField(
                 name="prompt", 
                 title="Prompt", 
@@ -96,6 +135,7 @@ for item in data_file:
     record = rg.Record(
         id=item["instance_id"],
         fields={
+            "visual": TABLE_EX_STRING,
             "prompt": item["prompt"],
             "answer_a": item["answer_A"],
             "answer_b": item["answer_B"]
