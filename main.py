@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import os
 import json
 
+from utils.diff2html import get_html_diff
+
 load_dotenv()
 RG_API_URL = os.getenv('API_URL')
 RG_API_KEY = os.getenv('API_KEY')
@@ -10,37 +12,6 @@ EVAL_WORKSPACE = os.getenv('RG_WORKSPACE')
 NUMBER_USERS = int(os.getenv('NUMBER_USERS'))
 DATASET_PATH = os.getenv('DATASET_PATH')
 DATASET_NAME = os.getenv('DATASET_NAME')
-
-TABLE_EX_STRING = """
-<table>
-<tr>
-<th> Good </th>
-<th> Bad </th>
-</tr>
-<tr>
-<td>
-
-```c++
-int foo() {
-    int result = 4;
-    return result;
-}
-```
-
-</td>
-<td>
-
-```c++
-int foo() {
-    int x = 4;
-    return x;
-}
-```
-
-</td>
-</tr>
-</table>
-"""
 
 client = rg.Argilla(
     api_url=RG_API_URL, 
@@ -129,13 +100,17 @@ dataset = rg.Dataset(
     client=client
 ).create()
 
+## JSON DIFF
+
+html_diff = get_html_diff("sample_data/1.json", "sample_data/2.json")
+
 """"LOGIN RECORDS"""
 records = []
 for item in data_file:
     record = rg.Record(
         id=item["instance_id"],
         fields={
-            "visual": TABLE_EX_STRING,
+            "visual": html_diff,
             "prompt": item["prompt"],
             "answer_a": item["answer_A"],
             "answer_b": item["answer_B"]
