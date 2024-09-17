@@ -2,6 +2,7 @@ import argilla as rg
 from dotenv import load_dotenv
 import os
 import json
+import yaml
 
 from utils.diff2html import get_html_diff
 
@@ -22,16 +23,32 @@ def load_json(file_path, encoding=None):
     with open(file_path, 'r', encoding=encoding) as file:
         return json.load(file)
 
+def load_yaml(file_path, encoding=None):
+    with open(file_path, 'r', encoding=encoding) as file:
+        return yaml.load(file, Loader=yaml.FullLoader)
+
+def generate_label_markdown(labels):
+    markdown = ""
+    for key, values in labels.items():
+        markdown += f"<details>\n"
+        markdown += f"<summary>{key}</summary>\n\n"
+        for value in values:
+            markdown += f"- {value}\n"
+        markdown += f"\n</details>\n"
+    return markdown
+
+input_h_labels_dict = load_yaml('labels/taxonomy_labels_test.yml')
+input_h_labels = list(input_h_labels_dict.keys())
+label_markdown = generate_label_markdown(input_h_labels_dict)
+
 """DATASET SETTINGS"""
 settings = rg.Settings(
     distribution=rg.TaskDistribution(min_submitted=NUMBER_USERS),
     allow_extra_metadata=True,
     guidelines="""
-    1. **Consistency:** Label each example consistently according to the defined criteria, ensuring no bias towards either variant.
-    2. **Clarity:** Focus on the specific elements being tested (e.g., text, design) and how they impact the user's experience.
-    3. **Detail:** Provide brief but clear justifications for your choice if required, highlighting key differences.
-    4. **Neutrality:** Avoid letting personal preferences influence your annotation; stick to the test's objective.
-    """,
+    Please label the errors according to the given taxonomy. If a new type of error is observed please introduce it to the text box.
+    Insert error labeling instructions here.\n\n
+"""+label_markdown,
     fields=[
             rg.TextField(
                 name="visual",
@@ -40,48 +57,33 @@ settings = rg.Settings(
                 required=True,
                 description="Field description"
             ),
-
             rg.TextField(
-                name="prompt", 
-                title="Prompt", 
+                name="ref_errors",
+                title="Reference Errors",
                 use_markdown=True,
                 required=True,
                 description="Field description"
-            ),
-            rg.TextField(
-                name="answer_a", 
-                title="Answer A", 
-                use_markdown=True,
-                required=True,
-                description="Field description",
-            ),
-            rg.TextField(
-                name="answer_b", 
-                title="Answer B", 
-                use_markdown=True,
-                required=True,
-                description="Field description",
             )
         ],
     questions=[
         rg.LabelQuestion(
             name="label",
-            title="What is the best response given the prompt?",
+            title="What is the corresponding error?",
             description="Select the one that applies.",
             required=True,
-            labels={"answer_a": "Answer A", "answer_b": "Answer B", "both": "Both", "none": "None"}
+            labels=['None']+input_h_labels
           
         ),
-        rg.RatingQuestion(
-                name="rating",
-                values=[1, 2, 3, 4, 5],
-                title="How satisfied are you with the response?",
-                description="1 = very unsatisfied, 5 = very satisfied",
-                required=True,
+        rg.TextQuestion(
+            name="sublabel",
+            title="What is the specific type of the given error? (Please check the error reference)",
+            description="Please check the error reference, and write the subtype in the text box.",
+            use_markdown=True,
+            required=True
         ),
         rg.TextQuestion(
             name="text",
-            title="Copy and modify the response here if there is anything you would like to modify.",
+            title="Copy and modify the reference here if there is anything you would like to modify with the original reference.",
             description="If there is anything you would modify in the response copy and edit the response in this field.",
             use_markdown=True,
             required=False
@@ -111,9 +113,7 @@ for item in data_file:
         id=item["instance_id"],
         fields={
             "visual": html_diff,
-            "prompt": item["prompt"],
-            "answer_a": item["answer_A"],
-            "answer_b": item["answer_B"]
+            "ref_errors": label_markdown
         }
     )
     records.append(record)
