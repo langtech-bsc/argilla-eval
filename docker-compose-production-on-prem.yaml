@@ -1,0 +1,129 @@
+services:
+  argilla:
+    image: argilla/argilla-server:v2.2.0
+    restart: unless-stopped
+    expose:
+      - "6900"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ARGILLA_HOME_PATH: /var/lib/argilla
+      ARGILLA_ELASTICSEARCH: ${ARGILLA_ELASTICSEARCH:-http://elasticsearch:9200}
+      ARGILLA_DATABASE_URL: ${ARGILLA_DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}}
+      # ARGILLA_DATABASE_URL: ${ARGILLA_DATABASE_URL:-postgresql://argilla:argilla@postgres:5432/argilla}
+      # Opt-out for telemetry https://docs.argilla.io/latest/reference/argilla-server/telemetry/
+      ARGILLA_ENABLE_TELEMETRY: 0
+      ARGILLA_DEFAULT_USER_ENABLED: ${ARGILLA_DEFAULT_USER_ENABLED:-false}
+      USERNAME: ${USERNAME:?USERNAME is not set for argilla. Please define it.}
+      PASSWORD: ${PASSWORD:?PASSWORD is not set for argilla. Please define it.}
+      API_KEY: ${API_KEY:?API_KEY is not set set for argilla. Please define it.}
+      # REINDEX_DATASETS: 1 # Uncomment this line to reindex Argilla datasets into the search engine when starting up
+    networks:
+      - argilla
+      - proxy-net
+    volumes:
+      # ARGILLA_HOME_PATH is used to define where Argilla will save it's application data.
+      # If you change ARGILLA_HOME_PATH value please copy that same value to argilladata volume too.
+      - argilladata:/var/lib/argilla
+
+  postgres:
+    restart: unless-stopped
+    image: postgres:16.4
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_NAME:?POSTGRES_DB_NAME is not set for posgres. Please define it.}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is not set for posgres. Please define it.}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is not set for posgres. Please define it.}
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    networks:
+      - argilla
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME} -h localhost -t 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    restart: unless-stopped
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-argilla-local
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - argilla
+    expose:
+      - "9200"
+      - "9300"
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data/
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=50s"]
+      interval: 30s
+      timeout: 50s
+      retries: 20
+      start_period: 10s
+
+  argilla-elastic-backup:
+    image: langtechbsc/multi-elasticseach-backup-s3:latest
+    restart: unless-stopped
+    environment:
+      SCHEDULE: ${SCHEDULE-@every 1h}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS-30}
+      S3_REGION: us-east-1
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_PREFIX: ${S3_PREFIX-argilla_elastic_backups}
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch:9200}
+    networks:
+      - argilla
+    depends_on:
+      - elasticsearch
+
+  argilla-db-backup:
+    image: eeshugerman/postgres-backup-s3:16
+    restart: unless-stopped
+    environment:
+      SCHEDULE: ${SCHEDULE-@every 1h}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS-30}
+      S3_REGION: us-east-1
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_PREFIX: ${S3_PREFIX-argilla_db_backups}
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: ${POSTGRE_NAME}
+      POSTGRES_USER: ${POSTGRE_USER}
+      POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
+    networks:
+      - argilla
+    depends_on:
+      - postgres
+
+networks:
+  proxy-net:
+    external: true
+  argilla:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU-1500}
+
+volumes:
+  argilladata:
+  elasticdata:
+  postgresdata:
