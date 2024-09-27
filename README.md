@@ -41,6 +41,61 @@ DATASET_NAME=prompts-eval-dataset
 DATASET_PATH=dataset.json
 ```
 
+
+### Deploy on premise (bsc only)
+#### Prerequisites
+
+Make
+
+[Docker](https://docs.docker.com/engine/install/ubuntu/)
+
+[Docker compose](https://docs.docker.com/compose/install/)
+
+#### Environment Variables
+To run this project, you will need to add the following environment variables to your .env file.
+
+
+`USERNAME`
+
+`PASSWORD`
+
+`API_KEY`
+
+`POSTGRES_DB_NAME`
+
+`POSTGRES_USER`
+
+`POSTGRES_PASSWORD`
+
+
+Example .env file
+
+```bash
+USERNAME=my-user
+PASSWORD=123456789
+API_KEY=argila.api-key
+POSTGRES_DB_NAME=argilla
+POSTGRES_USER=argilla
+POSTGRES_PASSWORD=argilla
+```
+
+
+#### Deployment (docker compose)
+
+To deploy the label studio annotation tool
+
+```bash
+make deploy-on-prem
+```
+To stop deployment run
+```bash
+make stop-on-prem
+```
+To delete deployment run
+```bash
+make undeploy-on-prem
+```
+
 ### USAGE
 Once Argilla server is deployed we need to interact with it via sdk.
 
