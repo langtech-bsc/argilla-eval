@@ -1,4 +1,5 @@
 from unidiff import PatchSet
+from copy import deepcopy
 import io
 import sys
 import subprocess
@@ -10,6 +11,7 @@ class LineType(enum.Enum):
     Empty = 3
     Both = 4
     Special = 5
+    Current_Add = 6
 
 css_styles = '''
     * {
@@ -98,11 +100,17 @@ css_styles = '''
     .diff-container .diff-after .diff-line-number.diff-added {
         background-color: rgb(191, 242, 191);
     }
+    .diff-container .diff-after .diff-line-number.diff-current-added {
+        background-color: rgb(169, 189, 245);
+    }
     .diff-container .diff-before .diff-line-number.diff-removed {
         background-color: rgb(242, 191, 191);
     }
     .diff-container .diff-after .diff-content.diff-added {
         background-color: rgb(228, 255, 228);
+    }
+    .diff-container .diff-after .diff-content.diff-current-added {
+        background-color: rgb(169, 189, 245);
     }
     .diff-container .diff-before .diff-content.diff-removed {
         background-color: rgb(255, 228, 228);
@@ -149,12 +157,14 @@ def convert_to_html(patches_before, patches_after):
 
                 element_class = 'diff-line-number'
                 element_class += ' diff-added' if line_after[1] == LineType.Add else ''
+                element_class += ' diff-current-added' if line_after[1] == LineType.Current_Add else ''
                 element_class += ' diff-empty' if line_after[1] == LineType.Empty else ''
                 html_str += '<div class="diff-column diff-after"><div><div class="' + element_class + '">'
                 html_str += str(line_after[0]) if line_after[1] != LineType.Empty else ''
                 
                 element_class = 'diff-content'
                 element_class += ' diff-added' if line_after[1] == LineType.Add else ''
+                element_class += ' diff-current-added' if line_after[1] == LineType.Current_Add else ''
                 element_class += ' diff-empty' if line_after[1] == LineType.Empty else ''
                 html_str += '</div><div class="' + element_class + '"><div class="diff-pre">'
                 html_str += convert_string_for_html(line_after[2])
@@ -167,6 +177,27 @@ def convert_to_html(patches_before, patches_after):
     return html_str
 
 
+def highlight_n_change(patches, line_no):
+    new_patches = deepcopy(patches)
+    for patch_index in range(0, len(new_patches)):
+        for hunk_index in range(0, len(new_patches[patch_index][1])):
+            for line_index in range(0, len(new_patches[patch_index][1][hunk_index])):
+                value = new_patches[patch_index][1][hunk_index][line_index]
+                if value[1] == LineType.Add and value[0] == line_no:
+                    new_patches[patch_index][1][hunk_index][line_index] = \
+                                (value[0], LineType.Current_Add, value[2])
+    return new_patches
+
+
+def get_no_changes_lines(patches):
+    indices = []
+    for patch_index in range(0, len(patches)):
+        for hunk_index in range(0, len(patches[patch_index][1])):
+            for line_index in range(0, len(patches[patch_index][1][hunk_index])):
+                value = patches[patch_index][1][hunk_index][line_index]
+                if value[1] == LineType.Add:
+                    indices.append(value[0])
+    return indices
 
 def parse_diff(diff):
     patch_set = PatchSet(diff)
@@ -228,7 +259,7 @@ def parse_diff(diff):
     return patches_before, patches_after
 
 
-def compare_files(file1, file2):
+def compare_files(file1, file2, lines=None):
     """
     Compares two files using the 'diff' command and returns the differences.
     Raises an exception if an error occurs.
@@ -240,9 +271,13 @@ def compare_files(file1, file2):
     Returns:
     str: The differences between the two files.
     """
+    if not lines:
+        args = ['diff', '-u', file1, file2]
+    else:
+        args = ['diff', f'-u{lines}', file1, file2]
     try:
         result = subprocess.run(
-            ['diff', '-u', file1, file2],
+            args,
             capture_output=True,
             text=True
         )
@@ -256,9 +291,13 @@ def compare_files(file1, file2):
         raise Exception(f"An error occurred: {e}")
 
 
-def get_html_diff(file1, file2):
-    patch_diff = compare_files(file1, file2)
+def get_html_diff(file1, file2, lines=None):
+    html_str_list = []
+    patch_diff = compare_files(file1, file2, lines=lines)
     patches_before, patches_after = parse_diff(patch_diff)
-    html_str = convert_to_html(patches_before, patches_after)
+    diff_lines = get_no_changes_lines(patches_after)
+    for line in diff_lines:
+        modified_patches_after = highlight_n_change(patches_after, line)
+        html_str_list.append((line, convert_to_html(patches_before, modified_patches_after)))
 
-    return html_str
+    return html_str_list
