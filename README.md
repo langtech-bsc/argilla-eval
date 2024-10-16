@@ -70,4 +70,4 @@ Rercods are stored at root level as `records.json`
 
 
 ## License
-This project is distributed under the Apache-2.0 license. See the [LICENSE](https://github.com/langtech-bsc/argilla-eval/main/LICENSE) file for more information.
+This project is distributed under the Apache-2.0 license. See the [LICENSE](https://github.com/langtech-bsc/argilla-eval/blob/main/LICENSE) file for more information.
