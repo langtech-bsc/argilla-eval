@@ -1,6 +1,6 @@
 services:
   argilla:
-    image: argilla/argilla-server:v2.2.0
+    image: argilla/argilla-server:v2.0.1
     restart: unless-stopped
     expose:
       - "6900"
