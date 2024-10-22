@@ -3,15 +3,17 @@ import os
 import sys
 
 filename = sys.argv[1]
+suffix = sys.argv[2]
 
 # Load the JSON data
 with open(filename, 'r') as file:
     data = json.load(file)
 
 # Create the output directory if it doesn't exist
-output_base = os.path.dirname(filename)
-output_dir = os.path.join(output_base, 'output')
-stem = os.path.splitext(os.path.basename(filename))[0]
+self_file_path = os.path.realpath(__file__)
+output_base = os.path.join(os.path.dirname(self_file_path), '../sample_data')
+output_dir = os.path.join(output_base, "_".join(['output', suffix]))
+stem = os.path.basename(filename).split("-")[0]
 os.makedirs(output_dir, exist_ok=True)
 
 # Write each dictionary to a separate file
