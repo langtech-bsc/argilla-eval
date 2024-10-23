@@ -2,3 +2,4 @@ python-dotenv==1.0.1
 argilla==2.0.1
 datasets==2.20.0
 pandas==2.2.2
+htmlmin==0.1.12

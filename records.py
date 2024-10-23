@@ -18,7 +18,7 @@ client = rg.Argilla(
 
 def load_json(file_path, encoding=None):
     with open(file_path, 'r', encoding=encoding) as file:
-        return json.load(file)
+        return json.load(file, encoding=encoding)
     
 data_file = load_json(DATASET_PATH)
 

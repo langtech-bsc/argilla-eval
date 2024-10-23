@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import json
 import yaml
+import htmlmin
 
 from utils.diff2html import get_html_diff
 
@@ -46,13 +47,13 @@ def generate_label_markdown(labels):
         markdown += f"<details>\n"
         markdown += f"<summary>{key}</summary>\n\n"
         for value in values:
-            markdown += f"- {value}\n"
+            markdown += f"- <p>{value}</p>\n"
         markdown += f"\n</details>\n"
     return markdown
 
 def generate_json_pre_markdown(from_json):
 
-    markdown = f"""<body><style>.json-pre span.button.tooltip__container svg {{fill: currentColor !important; width: 18px !important; height: 18px !important;}}</style><div class="json-pre"><details><summary>Click here to show JSON</summary><pre style="background: whitesmoke; padding: 25px;">{json.dumps(from_json, indent=2)}</pre></details></div></body>"""
+    markdown = f"""<body><style>.json-pre span.button.tooltip__container svg {{fill: currentColor !important; width: 18px !important; height: 18px !important;}}</style><div class="json-pre"><details><summary>Click here to show JSON</summary><pre style="background: whitesmoke; padding: 25px;">{json.dumps(from_json, indent=2, ensure_ascii=False)}</pre></details></div></body>"""
     return markdown
 
 # prepare the data files
@@ -63,14 +64,16 @@ input_h_labels_dict = load_yaml('labels/error_taxonomy.yml')
 input_h_labels = list(input_h_labels_dict.keys())
 label_markdown = generate_label_markdown(input_h_labels_dict)
 
+guidelines = """
+    Please label the errors according to the given taxonomy. If a new type of error is observed please introduce it to the text box.
+    Insert error labeling instructions here.\n\n
+"""+htmlmin.minify(label_markdown,remove_comments=True, remove_empty_space=True)
+
 """DATASET SETTINGS"""
 settings = rg.Settings(
     distribution=rg.TaskDistribution(min_submitted=NUMBER_USERS),
     allow_extra_metadata=True,
-    guidelines="""
-    Please label the errors according to the given taxonomy. If a new type of error is observed please introduce it to the text box.
-    Insert error labeling instructions here.\n\n
-"""+label_markdown,
+    guidelines=guidelines,
     fields=[
             rg.TextField(
                 name="visual",
@@ -154,7 +157,7 @@ for file1, file2 in data_files:
     html_diffs = get_html_diff(file1, file2, lines=40)
     for line, html_diff in html_diffs:
         if html_diff:
-            item = load_json(file1)
+            item = load_json(file1, encoding='utf-8')
             record = rg.Record(
                 id=f'{item["id"]}+{str(line)}',
                 fields={

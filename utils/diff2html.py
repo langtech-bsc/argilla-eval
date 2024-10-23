@@ -279,13 +279,14 @@ def compare_files(file1, file2, lines=None):
         result = subprocess.run(
             args,
             capture_output=True,
-            text=True
+            text=True,
+            encoding='utf-8'
         )
 
         if result.stderr:
             raise Exception(result.stderr)
-
-        return result.stdout
+        
+        return result.stdout.encode('utf-8').decode('unicode_escape')
     
     except Exception as e:
         raise Exception(f"An error occurred: {e}")

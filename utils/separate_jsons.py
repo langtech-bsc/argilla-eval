@@ -6,8 +6,8 @@ filename = sys.argv[1]
 suffix = sys.argv[2]
 
 # Load the JSON data
-with open(filename, 'r') as file:
-    data = json.load(file)
+with open(filename, 'r', encoding='utf-8') as file:
+    data = json.load(file, encoding='utf-8')
 
 # Create the output directory if it doesn't exist
 self_file_path = os.path.realpath(__file__)
@@ -23,5 +23,5 @@ for item in data:
     filepath = os.path.join(output_dir, filename)
 
     with open(filepath, 'w') as file:
-        json.dump(item, file, indent=2)
+        json.dump(item, file, indent=2, ensure_ascii=False)
     print(f'Saved {filename}')
