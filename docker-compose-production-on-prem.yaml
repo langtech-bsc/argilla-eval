@@ -1,6 +1,6 @@
 services:
   argilla:
-    image: argilla/argilla-server:v2.0.1
+    image: argilla/argilla-server:v2.8.0
     restart: unless-stopped
     expose:
       - "6900"
@@ -121,7 +121,7 @@ networks:
     external: true
   argilla:
     driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU-1500}
+      com.docker.network.driver.mtu: ${NETWORK_MTU-1440}
 
 volumes:
   argilladata:
