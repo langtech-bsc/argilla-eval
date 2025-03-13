@@ -9,24 +9,22 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: ${ARGILLA_ELASTICSEARCH:-http://elasticsearch:9200}
       ARGILLA_DATABASE_URL: ${ARGILLA_DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}}
-      # ARGILLA_DATABASE_URL: ${ARGILLA_DATABASE_URL:-postgresql://argilla:argilla@postgres:5432/argilla}
-      # Opt-out for telemetry https://docs.argilla.io/latest/reference/argilla-server/telemetry/
+      ARGILLA_REDIS_URL: "redis://redis:6379/0"
       ARGILLA_ENABLE_TELEMETRY: 0
       ARGILLA_DEFAULT_USER_ENABLED: ${ARGILLA_DEFAULT_USER_ENABLED:-false}
       USERNAME: ${USERNAME:?USERNAME is not set for argilla. Please define it.}
       PASSWORD: ${PASSWORD:?PASSWORD is not set for argilla. Please define it.}
       API_KEY: ${API_KEY:?API_KEY is not set set for argilla. Please define it.}
-      # REINDEX_DATASETS: 1 # Uncomment this line to reindex Argilla datasets into the search engine when starting up
     networks:
       - argilla
       - proxy-net
     volumes:
-      # ARGILLA_HOME_PATH is used to define where Argilla will save it's application data.
-      # If you change ARGILLA_HOME_PATH value please copy that same value to argilladata volume too.
       - argilladata:/var/lib/argilla
 
   postgres:
@@ -35,9 +33,9 @@ services:
     expose:
       - "5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB_NAME:?POSTGRES_DB_NAME is not set for posgres. Please define it.}
-      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is not set for posgres. Please define it.}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is not set for posgres. Please define it.}
+      POSTGRES_DB: ${POSTGRES_DB_NAME:?POSTGRES_DB_NAME is not set for postgres. Please define it.}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is not set for postgres. Please define it.}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is not set for postgres. Please define it.}
     volumes:
       - postgresdata:/var/lib/postgresql/data
     networks:
@@ -48,6 +46,14 @@ services:
       timeout: 10s
       retries: 10
       start_period: 10s
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    expose:
+      - "6379"
+    networks:
+      - argilla
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
