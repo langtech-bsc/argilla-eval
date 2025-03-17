@@ -114,7 +114,7 @@ services:
       S3_BUCKET: ${S3_BUCKET}
       S3_PREFIX: ${S3_PREFIX-argilla_db_backups}
       POSTGRES_HOST: postgres
-      POSTGRES_DATABASE: ${POSTGRE_NAME}
+      POSTGRES_DATABASE: ${POSTGRES_DB_NAME}
       POSTGRES_USER: ${POSTGRE_USER}
       POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
     networks:
