@@ -115,8 +115,8 @@ services:
       S3_PREFIX: ${S3_PREFIX-argilla_db_backups}
       POSTGRES_HOST: postgres
       POSTGRES_DATABASE: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRE_USER}
-      POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - argilla
     depends_on:
