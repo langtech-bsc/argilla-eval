@@ -6,10 +6,10 @@ import string
 import pandas as pd
 load_dotenv()
 
-ARGILLA_URL = os.getenv('API_URL')
-ARGILLA_KEY = os.getenv("API_KEY")
-EVAL_WORKSPACE = os.getenv("RG_WORKSPACE")
-NUM_USERS = int(os.getenv("NUMBER_USERS"))
+ARGILLA_URL = os.getenv('API_URL', "http://localhost:6900")
+ARGILLA_KEY = os.getenv("API_KEY", "argilla.apikey")
+EVAL_WORKSPACE = os.getenv("RG_WORKSPACE", "demo")
+NUM_USERS = int(os.getenv("NUMBER_USERS", 2))
 
 client = rg.Argilla(
     api_url=ARGILLA_URL,
